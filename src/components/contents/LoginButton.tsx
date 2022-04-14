@@ -9,7 +9,7 @@ class LoginButton extends React.Component<LoginButtonProps, LoginButtonState> {
         return (
             <div>
             <li className="nav-item dropdown">
-                <button className="btn btn-success dropdown-toggle my-2 my-sm-0" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <button className="btn btn-success dropdown-toggle my-2 my-sm-0" id="navbarDropdown" style={{background: "#19aa8d"}} role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                   Login
                 </button>
                 <div style={{width:"15rem"}} className="dropdown-menu">
@@ -31,7 +31,7 @@ class LoginButton extends React.Component<LoginButtonProps, LoginButtonState> {
                   <button type="submit" className="btn btn-primary">Sign in</button>
                 </form>
                 <div className="dropdown-divider"></div>
-                <a className="dropdown-item" href="#">Sign up</a>
+                <a className="dropdown-item" href="/signup">Sign up</a>
                 <a className="dropdown-item" href="#">Forgot password?</a>
               </div>
              </li>

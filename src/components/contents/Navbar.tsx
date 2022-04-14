@@ -16,7 +16,7 @@ class Navbar extends React.Component<NavbarProps, NavbarState> {
 		return (
 			<li className="navbar-item">
 			    <span className="navbar-text" style={userStyle}>Username</span>
-			    <button className="btn btn-success my-2 my-sm-0">Logout</button>
+			    <button className="btn btn-success my-2 my-sm-0" style={{background: "#19aa8d"}}>Logout</button>
 			</li>
 		)
 	}

@@ -2,21 +2,22 @@ import React from 'react';
 import {
   Routes, Route
 } from "react-router-dom";
-import Home from "./components/routes/Home";
+import { Home, About, Docs, Signup } from "./components/routes/route_index";
 import Navbar from "./components/contents/Navbar";
-import About from "./components/routes/About";
-import Docs from "./components/routes/Docs";
 import './App.css';
+
+const isLogged = false;
 
 function App() {
   return (
     <div className="App">
-    	<Navbar isLoggedIn={false} />
+    	<Navbar isLoggedIn={isLogged} />
       	<Routes>
-        	<Route path="/" element={<Home />} />
-        	<Route path="/home" element={<Home />} />
+        	<Route path="/" element={<Home isLoggedIn={isLogged} />} />
+        	<Route path="/home" element={<Home isLoggedIn={isLogged} />} />
         	<Route path="/about" element={<About />} />
         	<Route path="/docs" element={<Docs />} />
+        	<Route path="/signup" element={<Signup />} />
       	</Routes>
     </div>
   );
