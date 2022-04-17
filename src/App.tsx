@@ -4,23 +4,49 @@ import {
 } from "react-router-dom";
 import { Home, About, Docs, Signup } from "./components/routes/route_index";
 import Navbar from "./components/contents/Navbar";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 import './App.css';
 
-const isLogged = false;
+var isLogged = false;
 
-function App() {
-  return (
-    <div className="App">
-    	<Navbar isLoggedIn={isLogged} />
-      	<Routes>
-        	<Route path="/" element={<Home isLoggedIn={isLogged} />} />
-        	<Route path="/home" element={<Home isLoggedIn={isLogged} />} />
-        	<Route path="/about" element={<About />} />
-        	<Route path="/docs" element={<Docs />} />
-        	<Route path="/signup" element={<Signup />} />
-      	</Routes>
-    </div>
-  );
+interface AppState {
+	authUser : any
+}
+
+interface AppProp {}
+
+class App extends React.Component<AppProp,AppState> {
+	constructor(props: AppProp) {
+		super(props);
+
+		this.state = {
+			authUser : null
+		}
+	}
+
+	componentDidMount() {
+		const auth = getAuth();
+		onAuthStateChanged(auth, (user) => {
+			if (user) {
+		    	this.setState({authUser: user})
+			}
+		});
+	}
+
+	render() : React.ReactNode {
+	  return (
+	    <div className="App">
+	    	<Navbar authUser={this.state.authUser}/>
+	      	<Routes>
+	        	<Route path="/" element={<Home authUser={this.state.authUser} />} />
+	        	<Route path="/home" element={<Home authUser={this.state.authUser} />} />
+	        	<Route path="/about" element={<About />} />
+	        	<Route path="/docs" element={<Docs />} />
+	        	<Route path="/signup" element={<Signup />} />
+	      	</Routes>
+	    </div>
+	  );
+	}
 }
 
 export default App;

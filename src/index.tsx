@@ -24,8 +24,10 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+const firebase_app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(firebase_app);
+
+export default firebase_app;
 
 ReactDOM.render(
   <React.StrictMode>

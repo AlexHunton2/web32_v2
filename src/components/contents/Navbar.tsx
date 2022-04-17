@@ -1,22 +1,39 @@
 import React from "react";
-import LoginButton from "./LoginButton"
+import LoginButton from "./LoginButton";
+import { getAuth, signOut, onAuthStateChanged } from "firebase/auth";
 
 interface NavbarState {}
 
 interface NavbarProps {
-	isLoggedIn: boolean
+	authUser?: any
 }
 
 class Navbar extends React.Component<NavbarProps, NavbarState> {
-	loggedIn() : React.ReactNode {
+	constructor(props: NavbarProps) {
+		super(props)
+		this.logOut = this.logOut.bind(this)
+	}
+
+
+	logOut() {
+		const auth = getAuth();
+		signOut(auth).then(() => {
+		  // Sign-out successful.
+		}).catch((error) => {
+		  const error_message = error.message;
+		  console.log(error_message);
+		});
+		window.location.reload();
+	}
+
+	loggedIn(username : string) : React.ReactNode {
 		const userStyle = {
 			marginRight: '20px',
 		}
-
 		return (
 			<li className="navbar-item">
-			    <span className="navbar-text" style={userStyle}>Username</span>
-			    <button className="btn btn-success my-2 my-sm-0" style={{background: "#19aa8d"}}>Logout</button>
+			    <span className="navbar-text" style={userStyle}>{username}</span>
+			    <button className="btn btn-success my-2 my-sm-0" onClick={this.logOut} style={{background: "#19aa8d"}}>Logout</button>
 			</li>
 		)
 	}
@@ -33,14 +50,12 @@ class Navbar extends React.Component<NavbarProps, NavbarState> {
 		const navStyle = {
 			background: "#4c4ce8"
 		}
-
-		let navbarLogin;
-		if (this.props.isLoggedIn) {
-			navbarLogin = this.loggedIn()
-		} else {
-			navbarLogin = this.loggedOut()
+		let username = "NULL"
+		if (this.props.authUser) {
+			username = this.props.authUser.email;
 		}
 
+		let navbarLogin = this.props.authUser ? this.loggedIn(username) : this.loggedOut();
 		return (
 			<nav className="navbar navbar-expand-lg navbar-dark" style={navStyle}>
 			  <div className="container-fluid" id="navbar-text">
