@@ -68,7 +68,8 @@ class FolderStructure extends React.Component<FolderStructureProps, FolderStruct
             	<ErrorBoundary>
 	            	<DirectoryTree
 				      treeData={treeData}
-				      style={{overflow: "auto", overflowX: 'scroll'}}
+				      style={{overflow: "auto", overflowX: 'scroll', minWidth: "200px", width: "max-content"}}
+
 				    />
 				</ErrorBoundary>
 			</div>

@@ -2,8 +2,6 @@
     display: inline-flex !important;
     justify-content: flex-start !important;
     text-align: left !important;
-    min-width: 0px;
-    max-width: 200px; /* Restrict leave titles so they don't overflow */
     flex: none;
 }
 
@@ -15,3 +13,6 @@
 	width: 0px;
 }
 
+#folder-structure {
+	padding-right: 0px;
+}
