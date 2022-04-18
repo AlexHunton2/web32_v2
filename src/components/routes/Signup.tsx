@@ -8,7 +8,9 @@ interface SignupState {
 
 }
 
-interface SignupProps {}
+interface SignupProps {
+	history : string;
+}
 
 class Signup extends React.Component<SignupProps, SignupState> {
 	constructor(props: SignupProps) {

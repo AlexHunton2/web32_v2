@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom"
 import LoginButton from "./LoginButton";
 import { getAuth, signOut, onAuthStateChanged } from "firebase/auth";
 
@@ -59,17 +60,17 @@ class Navbar extends React.Component<NavbarProps, NavbarState> {
 		return (
 			<nav className="navbar navbar-expand-lg navbar-dark" style={navStyle}>
 			  <div className="container-fluid" id="navbar-text">
-			    <a className="navbar-brand" href="/home">Web32</a>
+			    <Link className="navbar-brand" to={"/home"}>Web32</Link>
 			    <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
 			      <span className="navbar-toggler-icon"></span>
 			    </button>
 			    <div className="collapse navbar-collapse" id="navbarText">
 			      <ul className="navbar-nav me-auto mb-2 mb-lg-0">
 			      	<li className="nav-item">
-			          <a className="nav-link active" aria-current="page" href="/docs">Docs</a>
+			          <Link className="nav-link active" aria-current="page" to={"/docs"}>Docs</Link>
 			        </li>
 			        <li className="nav-item">
-			          <a className="nav-link active" aria-current="page" href="/about">About</a>
+			          <Link className="nav-link active" aria-current="page" to={"/about"}>About</Link>
 			        </li>
 			      </ul>
 			      <ul className="navbar-nav">

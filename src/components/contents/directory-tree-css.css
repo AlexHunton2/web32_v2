@@ -1,0 +1,17 @@
+.ant-tree-node-content-wrapper-normal .ant-tree-title {
+    display: inline-flex !important;
+    justify-content: flex-start !important;
+    text-align: left !important;
+    min-width: 0px;
+    max-width: 200px; /* Restrict leave titles so they don't overflow */
+    flex: none;
+}
+
+.ant-tree.ant-tree-block-node .ant-tree-list-holder-inner .ant-tree-node-content-wrapper {
+	flex: none;
+}
+
+.ant-tree-switcher .ant-tree-switcher-noop {
+	width: 0px;
+}
+
