@@ -1,12 +1,12 @@
+import firebase_app from "./utils/firebaseinit.js";
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter } from 'react-router-dom';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import firebase_app from "./utils/firebaseinit.js";
 
-let app = firebase_app
+let app = firebase_app;
 
 ReactDOM.render(
   <React.StrictMode>
