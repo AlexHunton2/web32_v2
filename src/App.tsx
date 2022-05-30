@@ -4,10 +4,8 @@ import {
 } from "react-router-dom";
 import { Home, About, Docs, Signup } from "./components/routes/route_index";
 import Navbar from "./components/contents/Navbar";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { getAuth, onAuthStateChanged, setPersistence, browserSessionPersistence } from "firebase/auth";
 import './App.css';
-
-var isLogged = false;
 
 interface AppState {
 	authUser : any
@@ -26,6 +24,7 @@ class App extends React.Component<AppProp,AppState> {
 
 	componentDidMount() {
 		const auth = getAuth();
+		setPersistence(auth, browserSessionPersistence)
 		onAuthStateChanged(auth, (user) => {
 			if (user) {
 		    	this.setState({authUser: user})
