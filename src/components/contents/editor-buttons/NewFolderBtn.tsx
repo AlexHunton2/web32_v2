@@ -26,9 +26,11 @@ class NewFolderBtn extends React.Component<NewFolderBtnProps, NewFolderBtnState>
 
 	handleSubmit(formValue: { folder_name: string; }) {
 		const { folder_name } = formValue;
-		const key : string = String(this.props.selectedItem['key']);
-		const fn = (folder_name == "") ? "null" : folder_name;
-		FileStructureAPI.getInstance().createNewFolder(fn, key);
+		if (!this.props.selectedItem['isLeaf']) {
+			const parent : string = String(this.props.selectedItem['key']);
+			const fn = (folder_name == "") ? "null" : folder_name;
+			FileStructureAPI.getInstance().createNewFolder(fn, parent);
+		}
 		($('#newFolderModal') as any).modal('hide')
 	}
 

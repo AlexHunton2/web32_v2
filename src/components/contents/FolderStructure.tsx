@@ -97,12 +97,20 @@ function treeifyFileSystem(nodes : any[]) : any {
 	var temp = [];
 	for (var i = 0; i < nodes.length; i++) {
 		const v = nodes[i];
-		const c = treeifyFileSystem(v['folder_children'])
-		temp.push({
-			title: v['name'], 
-			key: v['id'],
-			children: c
-		});
+		if (v['children'] != undefined) {
+			const c = treeifyFileSystem(v['children'])
+			temp.push({
+				title: v['name'], 
+				key: v['id'],
+				children: c
+			});
+		} else {
+			temp.push({
+				title: v['name'], 
+				key: v['id'],
+				isLeaf: true
+			});
+		}
 	}
 	return temp
 } 

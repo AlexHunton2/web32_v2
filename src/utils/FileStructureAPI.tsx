@@ -1,6 +1,7 @@
 import * as firebasedb from "firebase/database";
 import { getAuth } from "firebase/auth";
 import { Observable } from 'rxjs';
+import { cloneDeep } from 'lodash';
 
 /*
 Firebase Structure
@@ -25,6 +26,7 @@ files:
 interface dbItem {
 	name : string // name / title of the item
 	id : string // id of the item
+	parent : string
 }
 
 /**
@@ -40,8 +42,7 @@ interface dbFile extends dbItem {
  * the necessary functions that deal with the data. 
  */
 interface dbFolder extends dbItem {
-	folder_children : dbFolder[] // array of folder children
-	file_children : dbFile[] // array of file children
+	children : dbItem[] // array of folder children
 }
 
 /**
@@ -57,6 +58,9 @@ class FileStructureAPI {
 	private folderObserver : Observable<[]>;
 
 	private _fileSystemObservable : Observable<dbItem[]>;
+
+	private dbFolders : dbFolder[];
+	private dbFiles : dbFile[];
 
 	private _fileSystem : dbItem[];
 	private onFileSystemChangeCallback : Function;
@@ -75,6 +79,9 @@ class FileStructureAPI {
 
 		this._fileSystem = [];
 		this.onFileSystemChangeCallback = () => {};
+
+		this.dbFolders = [];
+		this.dbFiles = [];
 
 		this._fileSystemObservable = this.createFileSystemObservable();
 		this.fileSystem = this._fileSystem;
@@ -115,45 +122,84 @@ class FileStructureAPI {
 		})
 	}
 
+	private constructFileSystem() {
+		this._fileSystem = [];
+		// the files that need to be sorted into the fileSystem
+		// will be empty when we are done
+		let a : dbItem[] = cloneDeep(this.dbFiles);
+		let b : dbItem[] = cloneDeep(this.dbFolders);
+		let temp_items : {[index : number] : dbItem} = a.concat(b);
+
+		let level_folders = ['root'];
+		let level_arrays = [this._fileSystem];
+
+		for (let timeOut = 0; Object.keys(temp_items).length != 0; timeOut++) {
+			if (timeOut > 20) {
+				throw new Error("Timed Out Attempting To Retrive Folders/Files")
+				break; // if there are more than 20+ levels of folders...
+					   // make the damn projet with C++
+			}
+
+			let _t : string[] = [];
+			let _a : any[] = [];
+			Object.entries(temp_items).forEach(([key, item]) => {
+				if (level_folders.includes(item['parent'])) {
+					let folder = item as dbFolder;
+					if (folder['children'] != undefined) {
+						_t.push(folder['id'])
+						_a.push(folder['children'])
+					}
+					let index = level_folders.indexOf(item['parent']);
+					level_arrays[index].push(item);
+					delete temp_items[Number(key)]	
+				}
+			})
+			level_folders = _t;
+			level_arrays = _a;
+		}
+		this.fileSystem = this._fileSystem;
+	}
+
+	/**
+	 * Update the dbFiles/dbFolders as changes happen 
+	 * so that they can be combined 
+	 * in file system thru constructFileSystem
+	 */
 	private setupSubscription() {
 		const _this = this;
 		this.folderObserver.subscribe({
 			next(folders : { [index: string]: any; }) {
-				// first pass, get all root folders
-				// on all other passes, parent_folders gets updated
-				// to folders in next level
-				_this._fileSystem = [];
-				var parent_folders = ['root'];
-				var parent_arrays = [_this._fileSystem];
-				while(Object.entries(folders).length !== 0) {
-					var temp_folders : string[] = [];
-					var temp_arrays : dbFolder[][] = [];
+				_this.dbFolders = []
+				if (folders != null) {
 					Object.entries(folders).forEach(([key, value]) => {
-						const c = value['parent']
-						if (parent_folders.includes(value['parent'])) {
-							const folder : dbFolder = {
-								name: value['name'],
-								id: key,
-								folder_children: [],
-								file_children: [],
-							}
-							temp_folders.push(key);
-							temp_arrays.push(folder.folder_children);
-							const i = parent_folders.indexOf(value['parent'])
-							parent_arrays[i].push(folder);
-							delete folders[key];
+						const folder : dbFolder = {
+							name : value['name'],
+							id : key,
+							parent : value['parent'],
+							children: []
 						}
-					});
-					parent_folders = temp_folders;
-					parent_arrays = temp_arrays;
+						_this.dbFolders.push(folder);
+					})
 				}
-				_this.fileSystem = _this._fileSystem;
+				_this.constructFileSystem();
 			}
 		})
 
 		this.fileObserver.subscribe({
 			next(files) {
-				console.log(files);
+				_this.dbFiles = [];
+				if (files != null) {
+					Object.entries(files).forEach(([key, value]) => {
+						const file : dbFile = {
+							name : value['name'],
+							id : key,
+							parent : value['parent'],
+							contentID : value['contentID']
+						}
+						_this.dbFiles.push(file);
+					})
+				}
+				_this.constructFileSystem();
 			}
 		})
 	}
@@ -189,7 +235,7 @@ class FileStructureAPI {
 	 */
 	public createNewFolder(name: string, parent: string) {
 		console.log(parent)
-		const p = (parent == null) ? parent : "root";
+		const p = (parent == 'undefined') ? "root" : parent;
 		const folder_ref = firebasedb.ref(this.db, 'folders/');
 		firebasedb.push(folder_ref, {
 			userID: this.userID,
@@ -204,11 +250,11 @@ class FileStructureAPI {
 	 */
 	public createNewFile(name: string, parent: string) {
 		const c = 'idForLater';
-		const p = (parent == null) ? parent : "root"; 
+		const p = (parent == 'undefined') ? "root" : parent; 
 		const file_ref = firebasedb.ref(this.db, 'files/');
 		firebasedb.push(file_ref, {
 			userID: this.userID,
-			parent: parent,
+			parent: p,
 			name: name,
 			contentID: c
 		});
