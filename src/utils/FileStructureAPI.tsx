@@ -208,6 +208,10 @@ class FileStructureAPI {
 		this.onFileSystemChangeCallback = callback;
 	}
 
+	public get fileSystem() {
+		return this._fileSystem;
+	}
+
 	private set fileSystem(value:dbItem[]) {
 		this._fileSystem = value;
 		this.onFileSystemChangeCallback();

@@ -36,3 +36,18 @@
     transform: rotate(360deg);
   }
 }
+
+#home-content {
+  width: 850px;
+  margin: auto;
+}
+
+#navbar-text {
+  width: 780px;
+}
+
+.signup-form {
+  width: 400px;
+  margin: 0 auto;
+  padding: 30px 0;
+}

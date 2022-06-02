@@ -5,60 +5,11 @@ import { Tree } from 'antd';
 import 'antd/dist/antd.css';
 import './directory-tree-css.css'
 import FileStructureAPI from "./../../utils/FileStructureAPI"
+import { Subscription } from "rxjs"
 
 const { DirectoryTree } = Tree;
 
-const test_treeData = [
-	{
-		title: 'parent 0',
-		key: '0-0',
-		children: [
-			{
-				title: 'leaf 0-0',
-				key: '0-0-0',
-				isLeaf: true,
-			},
-			{
-				title: 'leaf 0-1',
-				key: '0-0-1',
-				isLeaf: true,
-			},
-			{
-				title: 'parent 0.5',
-				key: '0-0-2',
-				children: [
-					{
-						title: 'left 0.5-fart',
-						key: '0-0-3',
-						children: [
-							{
-								title: 'asdasdasdasd',
-								key: '0312312312',
-								isLeaf: true
-							}
-						]
-					}
-				]
-			}
-		],
-	},
-	{
-		title: 'parent 1',
-		key: '0-1',
-		children: [
-			{
-				title: 'leaf 1-0',
-				key: '0-1-0',
-				isLeaf: true,
-			},
-			{
-				title: 'leaf 1-1',
-				key: '0-1-1',
-				isLeaf: true,
-			},
-		],
-	},
-];
+const OBS = FileStructureAPI.getInstance().fileSystemObservable;
 
 /**
  * Give key, get title through the power of recursion
@@ -117,6 +68,7 @@ function treeifyFileSystem(nodes : any[]) : any {
  
 interface FolderStructureState {
 	treeData : []; 
+	subscription : Subscription
 }
 
 interface FolderStructureProps {
@@ -129,23 +81,34 @@ class FolderStructure extends React.Component<FolderStructureProps, FolderStruct
 			super(props);
 
 			this.state = {
-				treeData : []
+				treeData : [],
+				subscription : OBS.subscribe()
 			};
 
 			this.onSelect = this.onSelect.bind(this)
 		}
 
 		componentDidMount() {
-			const obs = FileStructureAPI.getInstance().fileSystemObservable;
+			// Get every time we rerender
+			const fs = FileStructureAPI.getInstance().fileSystem;
+			const c = treeifyFileSystem(fs)
+			this.setState({
+				treeData : c
+			});	
+
 			const _this = this;
-			obs.subscribe({
-				next(x) { 
-					const c = treeifyFileSystem(x)
+			const sub = OBS.subscribe({
+				next(x) {
 					_this.setState({
-						treeData : c
+						subscription : sub,
+						treeData : treeifyFileSystem(x)
 					})
 				}
 			})
+		}
+
+		componentWillUnmount() {
+			this.state.subscription.unsubscribe();
 		}
 
 		onSelect(selectedKeys : any, info : any) {
