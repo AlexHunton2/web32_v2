@@ -7,16 +7,16 @@ import { cloneDeep } from 'lodash';
 Firebase Structure
 
 folders:
-	-folder_key
-		-name : string
-		-parent : string
-		-userID : string
+	-userID
+		-folder_key
+			-name : string
+			-parent : string
 files:
-	-file_key
-		-name : string
-		-parent : string
-		-contentID : string
-		-userID : string
+	-userID
+		-file_key
+			-name : string
+			-parent : string
+			-contentID : string
 */
 
 
@@ -69,11 +69,10 @@ class FileStructureAPI {
 	private constructor() {
 		this.db = firebasedb.getDatabase();
 		this.userID = "";
+
 		this.refreshID();
 
-
 		// used later to keep fileSystem always updated.
-
 		this.fileObserver = this.createFileObservable();
 		this.folderObserver = this.createFolderObservable();
 
@@ -92,7 +91,7 @@ class FileStructureAPI {
 
 	public static getInstance() {
 		const i = this._instance || (this._instance = new this())
-		this._instance.refreshID()
+		this._instance.refreshID();
 		return i;
 	}
 
@@ -105,7 +104,7 @@ class FileStructureAPI {
 	}
 
 	private createFileObservable() : Observable<[]> {
-		const file_ref = firebasedb.ref(this.db, '/files');
+		const file_ref = firebasedb.ref(this.db, 'files/' + this.userID);
 		return new Observable<[]>(subscriber => {
 			firebasedb.onValue(file_ref, (snapshot : firebasedb.DataSnapshot) => {
 				subscriber.next(snapshot.val());
@@ -114,13 +113,14 @@ class FileStructureAPI {
 	}
 
 	private createFolderObservable() : Observable<[]> {
-		const folder_ref = firebasedb.ref(this.db, '/folders');
+		const folder_ref = firebasedb.ref(this.db, 'folders/' + this.userID);
 		return new Observable<[]>(subscriber => {
 			firebasedb.onValue(folder_ref, (snapshot : firebasedb.DataSnapshot) => {
 				subscriber.next(snapshot.val());
 			});
 		})
 	}
+
 
 	private constructFileSystem() {
 		this._fileSystem = [];
@@ -168,7 +168,7 @@ class FileStructureAPI {
 	private setupSubscription() {
 		const _this = this;
 		this.folderObserver.subscribe({
-			next(folders : { [index: string]: any; }) {
+			next(folders : { [index: string]: any }) {
 				_this.dbFolders = []
 				if (folders != null) {
 					Object.entries(folders).forEach(([key, value]) => {
@@ -186,7 +186,7 @@ class FileStructureAPI {
 		})
 
 		this.fileObserver.subscribe({
-			next(files) {
+			next(files : { [index: string] : any }) {
 				_this.dbFiles = [];
 				if (files != null) {
 					Object.entries(files).forEach(([key, value]) => {
@@ -238,11 +238,9 @@ class FileStructureAPI {
 	 * Generates a new folder in the database
 	 */
 	public createNewFolder(name: string, parent: string) {
-		console.log(parent)
 		const p = (parent == 'undefined') ? "root" : parent;
-		const folder_ref = firebasedb.ref(this.db, 'folders/');
+		const folder_ref = firebasedb.ref(this.db, 'folders/' + this.userID);
 		firebasedb.push(folder_ref, {
-			userID: this.userID,
 			parent: p,
 			name: name
 		});
@@ -255,13 +253,23 @@ class FileStructureAPI {
 	public createNewFile(name: string, parent: string) {
 		const c = 'idForLater';
 		const p = (parent == 'undefined') ? "root" : parent; 
-		const file_ref = firebasedb.ref(this.db, 'files/');
+		const file_ref = firebasedb.ref(this.db, 'files/' + this.userID);
 		firebasedb.push(file_ref, {
-			userID: this.userID,
 			parent: p,
 			name: name,
 			contentID: c
 		});
+	}
+
+	public deleteItem(key : string, isFile : boolean, children?: {[index : string] : any}[]) {
+		if (!isFile && children != null) {
+			children.forEach((child) => {
+				this.deleteItem(child['key'], child['isLeaf'], child['children'])
+			})
+		}
+		let path : string = isFile ? 'files/' : 'folders/';
+		const item_ref = firebasedb.ref(this.db, path + this.userID + '/' + key);
+		firebasedb.remove(item_ref)
 	}
 }
 

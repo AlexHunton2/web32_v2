@@ -9,8 +9,6 @@ import { Subscription } from "rxjs"
 
 const { DirectoryTree } = Tree;
 
-const OBS = FileStructureAPI.getInstance().fileSystemObservable;
-
 /**
  * Give key, get title through the power of recursion
  */
@@ -80,9 +78,11 @@ class FolderStructure extends React.Component<FolderStructureProps, FolderStruct
 		constructor(props: FolderStructureProps) {
 			super(props);
 
+			const observ = FileStructureAPI.getInstance().fileSystemObservable;
+
 			this.state = {
 				treeData : [],
-				subscription : OBS.subscribe()
+				subscription : observ.subscribe()
 			};
 
 			this.onSelect = this.onSelect.bind(this)
@@ -96,8 +96,9 @@ class FolderStructure extends React.Component<FolderStructureProps, FolderStruct
 				treeData : c
 			});	
 
+			const observ = FileStructureAPI.getInstance().fileSystemObservable;
 			const _this = this;
-			const sub = OBS.subscribe({
+			const sub = observ.subscribe({
 				next(x) {
 					_this.setState({
 						subscription : sub,
