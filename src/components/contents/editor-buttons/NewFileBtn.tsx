@@ -1,5 +1,6 @@
 import React from "react";
 import FileStructureAPI from "./../../../utils/FileStructureAPI"
+import CloudFileAPI from "./../../../utils/CloudFileAPI"
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import * as Yup from "yup";
 
@@ -9,11 +10,13 @@ interface NewFileBtnProps {
     selectedItem : {[index : string] : any}
 }
 
+const DEFAULT_FILE_CONTENT = "function start()\n\tlocal x = 5\nend";
+
 class NewFileBtn extends React.Component<NewFileBtnProps, NewFileBtnState> {
     constructor(props : NewFileBtnProps) {
         super(props);
 
-        this.handleSubmit = this.handleSubmit.bind(this)
+        this.handleSubmit = this.handleSubmit.bind(this);
     }
 
     validationSchema() {
@@ -26,10 +29,11 @@ class NewFileBtn extends React.Component<NewFileBtnProps, NewFileBtnState> {
     }
 
     handleSubmit(formValue: { folder_name: string; }) {
+        const contentID = CloudFileAPI.getInstance().uploadContents(DEFAULT_FILE_CONTENT);
         const { folder_name } = formValue;
         const key : string = String(this.props.selectedItem['key'])
         const fn = (folder_name == "") ? "null" : folder_name;
-        FileStructureAPI.getInstance().createNewFile(fn, key);
+        FileStructureAPI.getInstance().createNewFile(fn, key, contentID);
         ($('#newFileModal') as any).modal('hide');
     }
 

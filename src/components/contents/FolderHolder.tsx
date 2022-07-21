@@ -6,7 +6,9 @@ interface FolderHolderState {
 	selectedItem : {[index : string] : any}
 }
 
-interface FolderHolderProps {}
+interface FolderHolderProps {
+	selectedFileCallback : (newSelectedFileID : string) => void
+}
 
 /**
  * Serves the purpose of the literally just containing the buttons +
@@ -26,6 +28,11 @@ class FolderHolder extends React.Component<FolderHolderProps, FolderHolderState>
 	}
 
 	setSelectedItem(value : {[index : string] : any}) {
+		// if file
+		if (value['isLeaf']) {
+			this.props.selectedFileCallback(value['key'])	
+		}
+
 		this.setState({
 			selectedItem : value
 		})

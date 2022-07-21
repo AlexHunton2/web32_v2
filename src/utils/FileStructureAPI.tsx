@@ -208,6 +208,10 @@ class FileStructureAPI {
 		this.onFileSystemChangeCallback = callback;
 	}
 
+	/** 
+	 * The interface for the fileSystem represented on the firebase.
+	 * Please use this for all "read" operations
+	 */
 	public get fileSystem() {
 		return this._fileSystem;
 	}
@@ -229,9 +233,34 @@ class FileStructureAPI {
 		this._fileSystemObservable = value;
 	}
 
+	/**
+	 * Get live updates on changes the user makes when changes by subscribing 
+	 * to this observable
+	 */
 	public get fileSystemObservable() {
 		this.fileSystem = this._fileSystem;
 		return this._fileSystemObservable;
+	}
+
+	private getFID(fileID : string, arr : dbItem[]) : string {
+		var res = "";
+		for (var item of arr) {
+			if (item.id == fileID) {
+				res += (item as dbFile).contentID;
+			} else {
+				if ((item as dbFolder).children) {
+					res += this.getFID(fileID, (item as dbFolder).children);
+				}
+			}
+		}
+		return res;
+	}
+
+	/**
+	 * Get ContentID from FileID
+	 */
+	public getFileContentID(fileID : string) : string {
+		return this.getFID(fileID, this.fileSystem);
 	}
 
 	/**
@@ -250,14 +279,13 @@ class FileStructureAPI {
 	/**
 	 * Generates a new file in the database
 	 */
-	public createNewFile(name: string, parent: string) {
-		const c = 'idForLater';
+	public createNewFile(name: string, parent: string, contentID : string) {
 		const p = (parent == 'undefined') ? "root" : parent; 
 		const file_ref = firebasedb.ref(this.db, 'files/' + this.userID);
 		firebasedb.push(file_ref, {
 			parent: p,
 			name: name,
-			contentID: c
+			contentID: contentID
 		});
 	}
 
