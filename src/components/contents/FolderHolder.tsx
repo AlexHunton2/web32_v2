@@ -54,7 +54,7 @@ class FolderHolder extends React.Component<FolderHolderProps, FolderHolderState>
 						      </li>
 						    </ul>
 						    <span className="navbar-text">
-						      <DeleteItemBtn selectedItem={this.state.selectedItem} />
+						      <DeleteItemBtn selectedItem={this.state.selectedItem} setSelectedItem={this.setSelectedItem} />
 						    </span>
 						  </div>
 						</nav>

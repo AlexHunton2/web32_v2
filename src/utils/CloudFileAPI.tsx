@@ -82,9 +82,19 @@ class CloudFileAPI {
 		const ref = firebasedb.ref(this.db, 'file_contents/' + file_id);
 		return new Promise((resolve, reject) => {
 			firebasedb.onValue(ref, (snapshot : firebasedb.DataSnapshot) => {
-				resolve(snapshot.val().content);
+				const val = snapshot.val();
+				if (val) {
+					resolve(val.content);
+				} else {
+					reject();
+				}
 			})
 		})
+	}
+
+	public deleteContents(file_id : string) {
+		const ref = firebasedb.ref(this.db, 'file_contents/' + file_id);
+		firebasedb.remove(ref);
 	}
 }
 

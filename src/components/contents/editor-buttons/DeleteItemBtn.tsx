@@ -1,10 +1,12 @@
 import React from "react";
 import FileStructureAPI from "./../../../utils/FileStructureAPI"
+import CloudFileAPI from "./../../../utils/CloudFileAPI"
 
 interface DeleteItemBtnState {}
 
 interface DeleteItemBtnProps {
 	selectedItem : {[index : string] : any}
+	setSelectedItem : (value : {[index : string] : any}) => void;
 }
 
 class DeleteItemBtn extends React.Component<DeleteItemBtnProps, DeleteItemBtnState> {
@@ -14,7 +16,12 @@ class DeleteItemBtn extends React.Component<DeleteItemBtnProps, DeleteItemBtnSta
 	}
 
 	handleClick() {
-		if (this.props.selectedItem['key'] != undefined) { 
+		if (this.props.selectedItem['key'] != undefined) {
+			if (this.props.selectedItem['isLeaf']) {
+				const file_content_id = FileStructureAPI.getInstance().getFileContentID(this.props.selectedItem['key']);
+				CloudFileAPI.getInstance().deleteContents(file_content_id);
+				this.props.setSelectedItem({'key' : null, 'isLeaf' : true});
+			}
 			FileStructureAPI.getInstance().deleteItem(
 				this.props.selectedItem['key'], 
 				this.props.selectedItem['isLeaf'],

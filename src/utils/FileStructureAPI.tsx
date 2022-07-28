@@ -260,6 +260,7 @@ class FileStructureAPI {
 	 * Get ContentID from FileID
 	 */
 	public getFileContentID(fileID : string) : string {
+		if (!fileID) { return ""; }
 		return this.getFID(fileID, this.fileSystem);
 	}
 

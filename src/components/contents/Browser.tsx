@@ -13,6 +13,7 @@ interface BrowserState {
 interface BrowserProps {}
 
 const ERROR_FILE_CONTENT = "UNKOWN ISSUE: FAILED TO LOAD FILE CORRECTLY"
+const DEFAULT_FILE_CONTENT = "Open a file to view contents."
 
 class Browser extends React.Component<BrowserProps, BrowserState> {
 	private editorRef : React.RefObject<Editor>;
@@ -43,7 +44,6 @@ class Browser extends React.Component<BrowserProps, BrowserState> {
 					resolve();
 				})
 				.catch((error) => {
-					console.log(error);
 					createError("Uh oh!", error.toString(), "danger");
 					resolve();
 				})
@@ -57,17 +57,28 @@ class Browser extends React.Component<BrowserProps, BrowserState> {
 		// get content id from selectedFileID
 		const file_content_id = FileStructureAPI.getInstance().getFileContentID(newSelectedFileID);
 
-		if (!file_content_id) { return; }
-
 		// update current file id so safe save can occur
 
 		this.setState({
 			selectedFileContentID : file_content_id
 		})
 
+		if (!file_content_id) {
+			const currentEditor = this.editorRef.current;
+			if (currentEditor) {
+				currentEditor.setState({
+						content : DEFAULT_FILE_CONTENT,
+						readOnly : true,
+				}) 
+			}
+			return; 
+		}
+		
+
 		// update content on editor
 		var content_promise = CloudFileAPI.getInstance().readContents(file_content_id);
-		content_promise.then((content : string) => {			
+		content_promise
+		.then((content : string) => {			
 			if (!content) {
 				content = ERROR_FILE_CONTENT
 			}
@@ -80,6 +91,9 @@ class Browser extends React.Component<BrowserProps, BrowserState> {
 					readOnly : (!content),
 				})
 			}
+		})
+		.catch((error) => {
+			createError("Uh Oh!", error.toString(), "danger");
 		})
 	}
 
