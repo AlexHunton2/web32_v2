@@ -8,18 +8,20 @@ import "ace-builds/src-noconflict/theme-github";
 
 interface EditorState {
     content : string
+    readOnly : boolean
 }
 
 interface EditorProps {}
 
-const DEFAULT_FILE_CONTENT = "UNKOWN ISSUE: FAILED TO LOAD FILE CORRECTLY"
+const DEFAULT_FILE_CONTENT = "Open a file to view contents."
 
 class Editor extends React.Component<EditorProps, EditorState> {
     constructor(props: EditorProps) {
         super(props);
 
         this.state = {
-            content : DEFAULT_FILE_CONTENT
+            content : DEFAULT_FILE_CONTENT,
+            readOnly : true
         }
 
         this.onChange = this.onChange.bind(this)
@@ -46,12 +48,7 @@ class Editor extends React.Component<EditorProps, EditorState> {
                         width="auto"
 						name="UNIQUE_ID_OF_DIV"
 						editorProps={{ $blockScrolling: true }}
-                        setOptions={{
-                            enableBasicAutocompletion: true,
-                            enableLiveAutocompletion: true,
-                            enableSnippets: true,
-                            showPrintMargin: false
-                        }}
+                        readOnly={this.state.readOnly}
                         onChange={this.onChange}
                         value={this.state.content}
 			         	/>

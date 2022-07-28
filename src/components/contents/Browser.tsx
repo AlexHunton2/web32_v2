@@ -4,6 +4,7 @@ import FolderHolder from "./FolderHolder";
 import { RunBtn, SaveBtn } from "./editor-buttons/editor-buttons-index.js";
 import CloudFileAPI from "./../../utils/CloudFileAPI"
 import FileStructureAPI from "./../../utils/FileStructureAPI"
+import { createError } from "./../routes/Home";
 
 interface BrowserState {
 	selectedFileContentID : string // keyword here is "file"
@@ -11,7 +12,7 @@ interface BrowserState {
 
 interface BrowserProps {}
 
-const DEFAULT_FILE_CONTENT = "UNKOWN ISSUE: FAILED TO LOAD FILE CORRECTLY"
+const ERROR_FILE_CONTENT = "UNKOWN ISSUE: FAILED TO LOAD FILE CORRECTLY"
 
 class Browser extends React.Component<BrowserProps, BrowserState> {
 	private editorRef : React.RefObject<Editor>;
@@ -20,7 +21,7 @@ class Browser extends React.Component<BrowserProps, BrowserState> {
 		super(props);
 
 		this.state = {
-			selectedFileContentID : ""
+			selectedFileContentID : "",
 		}
 
 		this.editorRef = React.createRef<Editor>();
@@ -30,13 +31,25 @@ class Browser extends React.Component<BrowserProps, BrowserState> {
 	}
 
 	// called when save button is presssed
-	saveCallback() {
+	saveCallback() : Promise<void> {
 		const currentEditor = this.editorRef.current;
 		const file_content_id = this.state.selectedFileContentID;
-		if (currentEditor && file_content_id) {
-			const content = currentEditor.state.content;
-			CloudFileAPI.getInstance().uploadContents(content, file_content_id);
-		}
+		return new Promise((resolve, reject) => {
+			if (currentEditor && file_content_id) {
+				const content = currentEditor.state.content;
+				const uploadPromise = CloudFileAPI.getInstance().uploadContents(content, file_content_id);
+				uploadPromise
+				.then(() => {
+					resolve();
+				})
+				.catch((error) => {
+					console.log(error);
+					createError("Uh oh!", error.toString(), "danger");
+					resolve();
+				})
+			}
+		})
+		
 	}
 
 	// called when a file is selected
@@ -54,15 +67,17 @@ class Browser extends React.Component<BrowserProps, BrowserState> {
 
 		// update content on editor
 		var content_promise = CloudFileAPI.getInstance().readContents(file_content_id);
-		content_promise.then((content : string) => {
+		content_promise.then((content : string) => {			
 			if (!content) {
-				content = DEFAULT_FILE_CONTENT
+				content = ERROR_FILE_CONTENT
 			}
 
 			const currentEditor = this.editorRef.current;
+			
 			if (currentEditor) {
 				currentEditor.setState({
-					content : content
+					content : content,
+					readOnly : (!content),
 				})
 			}
 		})
@@ -82,12 +97,12 @@ class Browser extends React.Component<BrowserProps, BrowserState> {
 					   		<div className="row no-gutter" >
 					   			<nav className="navbar navbar-expand-lg">
 								  <div className="collapse navbar-collapse" id="navbarText">
+								  	<span className="navbar-item">
+								    	{this.state.selectedFileContentID && <SaveBtn saveCallback={this.saveCallback} />}
+								    </span>
 								    <ul className="navbar-nav me-auto"></ul>
 								    <span className="navbar-item">
 								    	<RunBtn />
-								    </span>
-								    <span className="navbar-item">
-								    	<SaveBtn saveCallback={this.saveCallback} />
 								    </span>
 								  </div>
 								</nav>

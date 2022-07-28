@@ -29,12 +29,14 @@ class NewFileBtn extends React.Component<NewFileBtnProps, NewFileBtnState> {
     }
 
     handleSubmit(formValue: { folder_name: string; }) {
-        const contentID = CloudFileAPI.getInstance().uploadContents(DEFAULT_FILE_CONTENT);
-        const { folder_name } = formValue;
-        const key : string = String(this.props.selectedItem['key'])
-        const fn = (folder_name == "") ? "null" : folder_name;
-        FileStructureAPI.getInstance().createNewFile(fn, key, contentID);
-        ($('#newFileModal') as any).modal('hide');
+        const uploadPromise = CloudFileAPI.getInstance().uploadContents(DEFAULT_FILE_CONTENT);
+        uploadPromise.then((contentID) => {
+            const { folder_name } = formValue;
+            const key : string = String(this.props.selectedItem['key'])
+            const fn = (folder_name == "") ? "null" : folder_name;
+            FileStructureAPI.getInstance().createNewFile(fn, key, contentID);
+            ($('#newFileModal') as any).modal('hide');
+        })
     }
 
     render(): React.ReactNode {
